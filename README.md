@@ -2,18 +2,6 @@
 
 A Go-based API service designed to interact with Kubernetes clusters.
 
-## Project Structure
-.
-├── .github/workflows
-│   └── ci-cd.yml
-├── k8s/
-│   └── deployment.yaml
-├── Dockerfile
-├── go.mod
-├── main.go
-├── LICENSE
-└── README.md
-
 ## Prerequisites
 - Go (1.22 or later)
 - Docker
