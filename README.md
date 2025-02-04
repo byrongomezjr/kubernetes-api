@@ -5,9 +5,9 @@ A Go-based API service designed to interact with Kubernetes clusters.
 ## Project Structure
 .
 ├── .github/workflows
-│ └── ci-cd.yml
+│   └── ci-cd.yml
 ├── k8s/
-│ └── deployment.yaml
+│   └── deployment.yaml
 ├── Dockerfile
 ├── go.mod
 ├── main.go
