@@ -1,3 +1,4 @@
 module kubernetes-api
 
-go 1.23.5
+// latest stable version
+go 1.22

@@ -1,0 +1,32 @@
+# binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+kubernetes-api
+
+# test binary, built with `go test -c`
+*.test
+
+# output of the go coverage tool
+*.out
+
+# dependency directories (remove the comment below to include it)
+# vendor/
+
+# go workspace file
+go.work
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# os generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
