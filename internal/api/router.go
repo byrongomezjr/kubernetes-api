@@ -11,6 +11,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// LogKey is a type for log field map keys to avoid staticcheck SA1029
+type LogKey string
+
 // SetupRouter sets up the HTTP router with all endpoints
 func SetupRouter() http.Handler {
 	r := mux.NewRouter()
@@ -44,12 +47,21 @@ func SetupRouter() http.Handler {
 // loggingMiddleware logs all HTTP requests
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logrus.WithFields(logrus.Fields{
+		// Create a custom map with LogKey type instead of string
+		fields := map[LogKey]interface{}{
 			"method": r.Method,
 			"path":   r.URL.Path,
 			"remote": r.RemoteAddr,
 			"agent":  r.UserAgent(),
-		}).Info("HTTP request")
+		}
+
+		// Convert to logrus.Fields
+		logFields := logrus.Fields{}
+		for k, v := range fields {
+			logFields[string(k)] = v
+		}
+
+		logrus.WithFields(logFields).Info("HTTP request")
 		next.ServeHTTP(w, r)
 	})
 }
