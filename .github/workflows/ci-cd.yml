@@ -83,7 +83,7 @@ jobs:
   deploy:
     needs: docker-build-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || contains(github.ref, 'deploy')
     
     steps:
     - uses: actions/checkout@v4
