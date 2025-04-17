@@ -47,10 +47,10 @@ type AuthResponse struct {
 
 // ApiResponse is a generic response structure
 type ApiResponse struct {
-	Status  string      `json:"status"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
+	Status  string                  `json:"status"`
+	Message string                  `json:"message,omitempty"`
+	Data    map[DataKey]interface{} `json:"data,omitempty"`
+	Error   string                  `json:"error,omitempty"`
 }
 
 // ItemRequest is used for item creation/update requests

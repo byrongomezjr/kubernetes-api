@@ -25,7 +25,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	resp := models.ApiResponse{
 		Status:  "success",
 		Message: "Service is healthy",
-		Data: map[DataKey]interface{}{
+		Data: map[models.DataKey]interface{}{
 			"version": "1.0.0",
 			"uptime":  time.Now().Unix(), // This should be actual uptime in a real app
 		},
@@ -220,7 +220,9 @@ func getItemsHandler(w http.ResponseWriter, r *http.Request) {
 	// Return response
 	resp := models.ApiResponse{
 		Status: "success",
-		Data:   items,
+		Data: map[models.DataKey]interface{}{
+			"items": items,
+		},
 	}
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -285,7 +287,9 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	resp := models.ApiResponse{
 		Status:  "success",
 		Message: "Item created successfully",
-		Data:    item,
+		Data: map[models.DataKey]interface{}{
+			"item": item,
+		},
 	}
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -342,7 +346,9 @@ func getItemHandler(w http.ResponseWriter, r *http.Request, itemID int) {
 	// Return response
 	resp := models.ApiResponse{
 		Status: "success",
-		Data:   item,
+		Data: map[models.DataKey]interface{}{
+			"item": item,
+		},
 	}
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -416,7 +422,9 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request, itemID int) {
 	resp := models.ApiResponse{
 		Status:  "success",
 		Message: "Item updated successfully",
-		Data:    item,
+		Data: map[models.DataKey]interface{}{
+			"item": item,
+		},
 	}
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -459,6 +467,7 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request, itemID int) {
 	resp := models.ApiResponse{
 		Status:  "success",
 		Message: "Item deleted successfully",
+		Data:    map[models.DataKey]interface{}{},
 	}
 
 	if err := json.NewEncoder(w).Encode(resp); err != nil {

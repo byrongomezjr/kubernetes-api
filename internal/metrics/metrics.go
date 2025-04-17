@@ -59,6 +59,9 @@ var (
 	)
 )
 
+// MetricKey is a type for metric field map keys to avoid staticcheck SA1029
+type MetricKey string
+
 // PrometheusHandler returns the HTTP handler for the Prometheus metrics endpoint
 func PrometheusHandler() http.Handler {
 	return promhttp.Handler()
