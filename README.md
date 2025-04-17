@@ -148,6 +148,36 @@ To set up the pipeline, you need to configure the following secrets in your GitH
 - `KUBE_CONFIG` - Kubernetes configuration file (base64 encoded)
 - `JWT_SECRET` - Secret key for JWT
 
+### Setting up Kubernetes Deployment in CI/CD
+
+For the deployment step to work correctly, you need to configure a valid Kubernetes configuration:
+
+1. **Generate a kubeconfig file** with access to your cluster:
+   ```bash
+   kubectl config view --minify --flatten > kubeconfig.yaml
+   ```
+
+2. **Encode the file to base64**:
+   ```bash
+   # Linux/macOS
+   cat kubeconfig.yaml | base64 -w 0
+   
+   # Windows (PowerShell)
+   [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes((Get-Content -Raw kubeconfig.yaml)))
+   ```
+
+3. **Add as a GitHub Secret**:
+   - Go to your repository on GitHub
+   - Navigate to Settings > Secrets and variables > Actions
+   - Click "New repository secret"
+   - Name: `KUBE_CONFIG`
+   - Value: Paste the base64 encoded string
+   
+4. **Grant necessary permissions**:
+   - Ensure the service account in your kubeconfig has permissions to deploy to the target namespace
+
+**Note**: If you don't have a Kubernetes cluster yet, the deployment step will be skipped automatically.
+
 ## Monitoring
 
 The application exposes metrics at the `/metrics` endpoint in Prometheus format. You can configure Prometheus to scrape these metrics and visualize them using Grafana.
@@ -273,4 +303,3 @@ data:
   LOG_LEVEL: "info"
   ENV: "production"
 ```
-
