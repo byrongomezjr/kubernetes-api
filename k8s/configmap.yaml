@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kubernetes-api-config
+  namespace: kubernetes-api
+data:
+  PORT: "8080"
+  LOG_LEVEL: "info"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "kubernetesapi"
+  DB_SSLMODE: "disable"

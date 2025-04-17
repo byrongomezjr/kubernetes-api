@@ -3,25 +3,54 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
 
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: byrongomezjr/kubernetes-api
+
 jobs:
-  build-and-push:
+  build-and-test:
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version: '1.22'
     
-    - name: Build and Test
-      run: |
-        go build -v ./...
-        go test -v ./...
+    - name: Install dependencies
+      run: go mod download
+    
+    - name: Build
+      run: go build -v ./...
+    
+    - name: Test
+      run: go test -v ./...
+    
+    - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: latest
+    
+  docker-build-push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
     
     - name: Login to Docker Hub
       uses: docker/login-action@v3
@@ -29,9 +58,64 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     
-    - name: Build and Push Docker image
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,format=short
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
         push: true
-        tags: byrongomezjr/kubernetes-api:latest
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+    
+  deploy:
+    needs: docker-build-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: 'latest'
+    
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+    
+    - name: Configure kubectl
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
+    
+    - name: Deploy to Kubernetes
+      run: |
+        # Determine image tag to use
+        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          TAG="${{ github.ref_name }}"
+        else
+          TAG="latest"
+        fi
+        
+        # Deploy with Helm
+        helm upgrade --install kubernetes-api ./helm/kubernetes-api \
+          --namespace kubernetes-api --create-namespace \
+          --set image.tag=${TAG} \
+          --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+          --set secrets.JWT_SECRET="${{ secrets.JWT_SECRET }}"
+        
+        # Verify deployment
+        kubectl rollout status deployment/kubernetes-api -n kubernetes-api

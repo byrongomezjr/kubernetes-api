@@ -30,3 +30,72 @@ go.work
 ._*
 .Spotlight-V100
 .Trashes
+
+# Environment variables and secrets
+.env
+*.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Kubernetes secrets that might contain sensitive data
+k8s/secrets/
+k8s/*secret*.yaml
+
+# Local development files
+dev/
+*.local.yaml
+*.local.yml
+
+# Log files
+logs/
+*.log
+
+# Build artifacts
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+kubernetes-api
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
+*.out
+
+# Docker and deployment secrets
+docker-compose.override.yml
+**/credentials.json
+
+# Kubernetes specific secrets
+k8s/secret.yaml
+helm/**/secret-values.yaml
+helm/**/local-values.yaml
+
+# Explicitly exclude secret files
+**/secret_*.go
+**/*_secret.go
+**/.secret
+**/credentials.yaml
+
+# Local configuration overrides
+**/*.local.conf
+**/*.local.json
+**/local-*.yaml
+
+# Any file containing the word 'credential', 'password', 'token', 'key'
+**/*credential*
+**/*password*
+**/*secret*
+**/*token*
+**/*apikey*
+

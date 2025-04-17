@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kubernetes-api-pdb
+  namespace: kubernetes-api
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: kubernetes-api
