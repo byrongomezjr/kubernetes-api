@@ -11,6 +11,7 @@ import (
 	"kubernetes-api/internal/database"
 	"kubernetes-api/internal/metrics"
 	"kubernetes-api/internal/models"
+	"kubernetes-api/pkg/utils"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -184,12 +185,13 @@ func itemsHandler(w http.ResponseWriter, r *http.Request) {
 
 // getItemsHandler handles GET /api/v1/items
 func getItemsHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract user ID from context (set by auth middleware)
-	_, ok := r.Context().Value("userID").(int)
+	// Extract user ID from context (set by auth middleware) using custom key
+	userID, ok := r.Context().Value(utils.UserIDKey).(int)
 	if !ok {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		http.Error(w, "Unauthorized: User ID not found in context", http.StatusUnauthorized)
 		return
 	}
+	logrus.Debugf("getItemsHandler called by user ID: %d", userID) // Optional: Add logging
 
 	// Query items from database
 	var items []models.Item
@@ -233,12 +235,13 @@ func getItemsHandler(w http.ResponseWriter, r *http.Request) {
 
 // createItemHandler handles POST /api/v1/items
 func createItemHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract user ID from context (set by auth middleware)
-	_, ok := r.Context().Value("userID").(int)
+	// Extract user ID from context (set by auth middleware) using custom key
+	userID, ok := r.Context().Value(utils.UserIDKey).(int)
 	if !ok {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		http.Error(w, "Unauthorized: User ID not found in context", http.StatusUnauthorized)
 		return
 	}
+	logrus.Debugf("createItemHandler called by user ID: %d", userID) // Optional: Add logging
 
 	var req models.ItemRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -300,6 +303,14 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 
 // itemHandler handles operations on a single item
 func itemHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract user ID from context (set by auth middleware) using custom key
+	userID, ok := r.Context().Value(utils.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized: User ID not found in context", http.StatusUnauthorized)
+		return
+	}
+	logrus.Debugf("itemHandler called by user ID: %d", userID) // Optional: Add logging
+
 	w.Header().Set("Content-Type", "application/json")
 
 	// Extract item ID from URL

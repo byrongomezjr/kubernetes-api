@@ -68,3 +68,11 @@ func GetEnv(key, fallback string) string {
 func GetEnvWithPrefix(prefix, key, fallback string) string {
 	return GetEnv(prefix+"_"+key, fallback)
 }
+
+// Define custom types for context keys
+type contextKey string
+
+const (
+	UserIDKey   contextKey = "userID"
+	UsernameKey contextKey = "username"
+)
