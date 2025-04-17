@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+// DataKey is a type for data map keys to avoid staticcheck SA1029
+type DataKey string
+
 // Item represents a basic entity in our application
 type Item struct {
 	ID          int       `json:"id"`
