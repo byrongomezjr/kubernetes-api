@@ -16,18 +16,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// DataKey is a type for data map keys to avoid staticcheck SA1029
+type DataKey string
+
 // healthHandler is the handler for the /api/health endpoint
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	resp := models.ApiResponse{
 		Status:  "success",
 		Message: "Service is healthy",
-		Data: map[string]interface{}{
+		Data: map[DataKey]interface{}{
 			"version": "1.0.0",
 			"uptime":  time.Now().Unix(), // This should be actual uptime in a real app
 		},
 	}
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logrus.WithError(err).Error("Failed to encode health response")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // registerHandler handles user registration
@@ -93,7 +99,10 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		Message: "User registered successfully",
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logrus.WithError(err).Error("Failed to encode register response")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // loginHandler handles user login
@@ -153,7 +162,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		Message: "Login successful",
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logrus.WithError(err).Error("Failed to encode login response")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // itemsHandler handles CRUD operations for items
@@ -211,7 +223,10 @@ func getItemsHandler(w http.ResponseWriter, r *http.Request) {
 		Data:   items,
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logrus.WithError(err).Error("Failed to encode items response")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // createItemHandler handles POST /api/v1/items
@@ -266,14 +281,17 @@ func createItemHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return response
+	w.WriteHeader(http.StatusCreated)
 	resp := models.ApiResponse{
 		Status:  "success",
 		Message: "Item created successfully",
 		Data:    item,
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logrus.WithError(err).Error("Failed to encode item response")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // itemHandler handles operations on a single item
@@ -327,7 +345,10 @@ func getItemHandler(w http.ResponseWriter, r *http.Request, itemID int) {
 		Data:   item,
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logrus.WithError(err).Error("Failed to encode item response")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // updateItemHandler handles PUT /api/v1/items/{id}
@@ -398,7 +419,10 @@ func updateItemHandler(w http.ResponseWriter, r *http.Request, itemID int) {
 		Data:    item,
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logrus.WithError(err).Error("Failed to encode item response")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // deleteItemHandler handles DELETE /api/v1/items/{id}
@@ -437,5 +461,8 @@ func deleteItemHandler(w http.ResponseWriter, r *http.Request, itemID int) {
 		Message: "Item deleted successfully",
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logrus.WithError(err).Error("Failed to encode item response")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }

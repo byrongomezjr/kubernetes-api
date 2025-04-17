@@ -58,5 +58,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 func notFoundHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte(`{"status":"error","error":"Resource not found"}`))
+	if _, err := w.Write([]byte(`{"status":"error","error":"Resource not found"}`)); err != nil {
+		logrus.WithError(err).Error("Failed to write not found response")
+	}
 }
