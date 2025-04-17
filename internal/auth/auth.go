@@ -14,6 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"kubernetes-api/internal/models"
+	"kubernetes-api/pkg/utils"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sirupsen/logrus"
@@ -130,10 +131,10 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// Add claims to request context
+		// Add claims to request context using custom keys
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, "userID", claims.UserID)
-		ctx = context.WithValue(ctx, "username", claims.Username)
+		ctx = context.WithValue(ctx, utils.UserIDKey, claims.UserID)
+		ctx = context.WithValue(ctx, utils.UsernameKey, claims.Username)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
